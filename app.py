@@ -331,7 +331,6 @@ def inject_css():
         }
         [data-testid="stSidebar"] *:not(.hero *) {
             color: #0f172a !important;
-            opacity: 1 !important;
         }
         h1:not(.hero h1), h2:not(.hero h2), h3:not(.hero h3),
         h4:not(.hero h4), h5:not(.hero h5), h6:not(.hero h6) {
@@ -343,17 +342,23 @@ def inject_css():
            kesan "teks sekunder" -- di tema gelap itu masih kebaca (abu-abu
            muda di atas gelap), tapi di tema terang paksaan kita ini jadi
            abu-abu pucat di atas background terang = nyaris nggak kebaca.
-           Dikunci lagi warna solid + opacity penuh. */
-        [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] *,
-        .stCaption, .stCaption * {
+           Dikunci lagi warna solid + opacity penuh. Opacity CUMA dipaksa di
+           elemen TEKS spesifik (p/span/markdown container), BUKAN pakai `*`
+           blanket -- sempat coba `*` tapi itu ikut maksa opacity elemen
+           non-teks (ikon SVG, indikator hover/transisi Streamlit) jadi
+           kepaksa keliatan terus & numpuk/tumpang tindih sama elemen lain. */
+        [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p,
+        [data-testid="stCaptionContainer"] span {
             color: #475569 !important;
             opacity: 1 !important;
         }
         /* Label radio (menu sidebar) yang belum dipilih juga sering di-dim
-           Streamlit -- kunci opacity penuh supaya semua opsi sama-sama jelas
-           kebaca, bukan cuma yang lagi aktif. */
-        [data-testid="stSidebar"] [role="radiogroup"] label,
-        [data-testid="stSidebar"] [role="radiogroup"] label * {
+           Streamlit -- kunci opacity penuh khusus di teks label-nya (span/p),
+           BUKAN di seluruh subtree label (yang juga berisi ikon SVG radio
+           button -- maksa opacity situ yang bikin numpuk). */
+        [data-testid="stSidebar"] [role="radiogroup"] label span,
+        [data-testid="stSidebar"] [role="radiogroup"] label p,
+        [data-testid="stSidebar"] [role="radiogroup"] label div[data-testid="stMarkdownContainer"] {
             opacity: 1 !important;
         }
 
