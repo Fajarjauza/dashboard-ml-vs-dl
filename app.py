@@ -336,7 +336,46 @@ def inject_css():
         h4:not(.hero h4), h5:not(.hero h5), h6:not(.hero h6) {
             color: #0f172a !important;
         }
-        [data-testid="stDataFrame"] {background-color: #ffffff !important;}
+        /* Tabel "Konfigurasi Training" & hasil prediksi sekarang pakai st.table
+           (HTML statis), BUKAN st.dataframe (canvas-based, ikut tema browser
+           viewer & nggak kena CSS override kita -- itu sebabnya sempat kelihatan
+           tetap gelap padahal background halaman sudah putih). Kolom index
+           (label baris) dikosongkan lewat _static_table(), disembunyikan lagi
+           di sini sebagai jaga-jaga. */
+        [data-testid="stTable"] table {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+        [data-testid="stTable"] th, [data-testid="stTable"] td {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border-color: #e2e8f0 !important;
+        }
+        [data-testid="stTable"] thead th:first-child,
+        [data-testid="stTable"] tbody th:first-child {
+            display: none;
+        }
+
+        /* Widget input (selectbox, text area, text input, number input) --
+           sama seperti tabel, elemen native Streamlit ini kadang tetap
+           ke-render pakai warna tema gelap viewer walau halaman sudah dipaksa
+           putih. Dikunci putih + border abu-abu + teks gelap supaya konsisten
+           dengan sisa halaman dan teksnya tetap kebaca. */
+        [data-testid="stTextArea"] textarea,
+        [data-testid="stTextInput"] input,
+        [data-testid="stNumberInput"] input {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border: 1px solid #cbd5e1 !important;
+        }
+        [data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
+        }
+        [data-testid="stSelectbox"] div[data-baseweb="select"] svg {
+            fill: #0f172a !important;
+        }
 
         /* st.caption() sengaja dibikin Streamlit redup/opacity rendah buat
            kesan "teks sekunder" -- di tema gelap itu masih kebaca (abu-abu
@@ -485,6 +524,21 @@ def config_table(d: dict) -> pd.DataFrame:
         else:
             rows.append({"Parameter": k, "Nilai": str(v)})
     return pd.DataFrame(rows)
+
+
+def _static_table(df: pd.DataFrame):
+    """Render dataframe sebagai tabel HTML statis (st.table), BUKAN st.dataframe.
+
+    st.dataframe pakai komponen "glide-data-grid" yang gambar isinya di <canvas> dan
+    ambil warna dari tema Streamlit yang lagi aktif di browser viewer -- ini di luar
+    jangkauan CSS override kita (CSS nggak bisa "masuk" ke canvas), jadi walau
+    background halaman sudah dipaksa putih, tabel ini tetap ke-render gelap kalau
+    browser/OS viewer preferensi dark. st.table render HTML biasa (<table>/<td>) yang
+    kena aturan warna CSS kita di inject_css(), jadi konsisten putih di semua kondisi.
+    """
+    display_df = df.copy()
+    display_df.index = [""] * len(display_df)
+    st.table(display_df)
 
 
 # =====================================================================
@@ -637,7 +691,7 @@ def halaman_ml():
     )
 
     section("Konfigurasi Training")
-    st.dataframe(config_table(ML_TRAINING_CONFIG), width="stretch", hide_index=True)
+    _static_table(config_table(ML_TRAINING_CONFIG))
     st.info(ML_RF_NOTE, icon="\U0001F333")
 
     section("Ringkasan Hasil", "Angka locked, vs Gold Standard -- 3 model ML saja (lihat halaman \"Dashboard\" untuk perbandingan dengan DistilBERT).")
@@ -668,7 +722,7 @@ def halaman_ml():
                 )
                 st.plotly_chart(_grouped_chart_per_aspek(ML_MODEL_NAMES), width="stretch", theme=None)
 
-            st.dataframe(_full_table(task, ML_MODEL_NAMES), width="stretch", hide_index=True)
+            _static_table(_full_table(task, ML_MODEL_NAMES))
 
 
 def halaman_dl():
@@ -680,7 +734,7 @@ def halaman_dl():
     )
 
     section("Konfigurasi Training")
-    st.dataframe(config_table(DL_TRAINING_CONFIG), width="stretch", hide_index=True)
+    _static_table(config_table(DL_TRAINING_CONFIG))
 
     section("Ringkasan Hasil", "Angka locked dari skripsi, vs Gold Standard.")
     tab_aspek, tab_sentimen = st.tabs(["\U0001F4CB Aspek", "\U0001F60A Sentimen"])
@@ -758,7 +812,7 @@ def halaman_dashboard():
                 "'test-split internal' = evaluasi terhadap split internal masing-masing model ML "
                 "(bukan angka pembanding utama, hanya konteks tambahan).",
             )
-            st.dataframe(_full_table(task, all_models), width="stretch", hide_index=True)
+            _static_table(_full_table(task, all_models))
 
 
 # =====================================================================
@@ -981,20 +1035,18 @@ def _render_hasil_side_by_side(text: str, ml_models, ml_vectorizers, dl_models, 
     with col_ml:
         st.markdown(f'<span class="badge badge-ml">ML — {ml_pilihan}</span>', unsafe_allow_html=True)
         st.write("**Skor Aspek**")
-        st.dataframe(
+        _static_table(
             pd.DataFrame(
                 {
                     "Aspek": ASPECTS,
                     "Skor": [f"{aspek_ml[ml_pilihan][a]['score']:.3f}" for a in ASPECTS],
                     "Terdeteksi": ["✅" if aspek_ml[ml_pilihan][a]["label"] else "" for a in ASPECTS],
                 }
-            ),
-            hide_index=True,
-            width="stretch",
+            )
         )
         st.write("**Sentimen per Aspek**")
         if aspek_gabungan:
-            st.dataframe(
+            _static_table(
                 pd.DataFrame(
                     [
                         {
@@ -1008,9 +1060,7 @@ def _render_hasil_side_by_side(text: str, ml_models, ml_vectorizers, dl_models, 
                         }
                         for a in aspek_gabungan
                     ]
-                ),
-                hide_index=True,
-                width="stretch",
+                )
             )
         else:
             st.caption("Tidak ada aspek yang terdeteksi (skor semua di bawah threshold 0.5).")
@@ -1018,20 +1068,18 @@ def _render_hasil_side_by_side(text: str, ml_models, ml_vectorizers, dl_models, 
     with col_dl:
         st.markdown('<span class="badge badge-dl">DistilBERT (DL)</span>', unsafe_allow_html=True)
         st.write("**Skor Aspek**")
-        st.dataframe(
+        _static_table(
             pd.DataFrame(
                 {
                     "Aspek": ASPECTS,
                     "Skor": [f"{aspek_dl[a]['score']:.3f}" for a in ASPECTS],
                     "Terdeteksi": ["✅" if aspek_dl[a]["label"] else "" for a in ASPECTS],
                 }
-            ),
-            hide_index=True,
-            width="stretch",
+            )
         )
         st.write("**Sentimen per Aspek**")
         if aspek_gabungan:
-            st.dataframe(
+            _static_table(
                 pd.DataFrame(
                     [
                         {
@@ -1041,9 +1089,7 @@ def _render_hasil_side_by_side(text: str, ml_models, ml_vectorizers, dl_models, 
                         }
                         for a in aspek_gabungan
                     ]
-                ),
-                hide_index=True,
-                width="stretch",
+                )
             )
         else:
             st.caption("Tidak ada aspek yang terdeteksi (skor semua di bawah threshold 0.5).")
