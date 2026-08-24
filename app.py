@@ -510,13 +510,22 @@ def _bar_chart_weighted_macro(task: str, models: list[str]):
     fig.update_layout(
         barmode="group",
         height=420,
-        yaxis=dict(title="F1 Score (vs Gold Standard)", range=[0, 1]),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        xaxis=dict(tickfont=dict(color="#0f172a")),
+        yaxis=dict(
+            title=dict(text="F1 Score (vs Gold Standard)", font=dict(color="#0f172a")),
+            range=[0, 1],
+            tickfont=dict(color="#0f172a"),
+        ),
+        legend=dict(
+            orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
+            font=dict(color="#0f172a"),
+        ),
         margin=dict(t=40, b=10, l=10, r=10),
         plot_bgcolor="white",
         paper_bgcolor="white",
         font=dict(color="#0f172a"),
     )
+    fig.update_traces(textfont=dict(color="#0f172a"))
     return fig
 
 
@@ -535,13 +544,22 @@ def _grouped_chart_per_aspek(models: list[str]):
     fig.update_layout(
         barmode="group",
         height=440,
-        yaxis=dict(title="F1 (vs Gold Standard)", range=[0, 1]),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        xaxis=dict(tickfont=dict(color="#0f172a")),
+        yaxis=dict(
+            title=dict(text="F1 (vs Gold Standard)", font=dict(color="#0f172a")),
+            range=[0, 1],
+            tickfont=dict(color="#0f172a"),
+        ),
+        legend=dict(
+            orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
+            font=dict(color="#0f172a"),
+        ),
         margin=dict(t=40, b=10, l=10, r=10),
         plot_bgcolor="white",
         paper_bgcolor="white",
         font=dict(color="#0f172a"),
     )
+    fig.update_traces(textfont=dict(color="#0f172a"))
     return fig
 
 
@@ -561,13 +579,19 @@ def _sentimen_per_kelas_chart():
     )
     fig.update_layout(
         height=360,
-        yaxis=dict(title="F1 (vs Gold Standard)", range=[0, 1]),
+        xaxis=dict(tickfont=dict(color="#0f172a")),
+        yaxis=dict(
+            title=dict(text="F1 (vs Gold Standard)", font=dict(color="#0f172a")),
+            range=[0, 1],
+            tickfont=dict(color="#0f172a"),
+        ),
         margin=dict(t=20, b=10, l=10, r=10),
         plot_bgcolor="white",
         paper_bgcolor="white",
         font=dict(color="#0f172a"),
         showlegend=False,
     )
+    fig.update_traces(textfont=dict(color="#0f172a"))
     return fig
 
 
