@@ -331,12 +331,31 @@ def inject_css():
         }
         [data-testid="stSidebar"] *:not(.hero *) {
             color: #0f172a !important;
+            opacity: 1 !important;
         }
         h1:not(.hero h1), h2:not(.hero h2), h3:not(.hero h3),
         h4:not(.hero h4), h5:not(.hero h5), h6:not(.hero h6) {
             color: #0f172a !important;
         }
         [data-testid="stDataFrame"] {background-color: #ffffff !important;}
+
+        /* st.caption() sengaja dibikin Streamlit redup/opacity rendah buat
+           kesan "teks sekunder" -- di tema gelap itu masih kebaca (abu-abu
+           muda di atas gelap), tapi di tema terang paksaan kita ini jadi
+           abu-abu pucat di atas background terang = nyaris nggak kebaca.
+           Dikunci lagi warna solid + opacity penuh. */
+        [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] *,
+        .stCaption, .stCaption * {
+            color: #475569 !important;
+            opacity: 1 !important;
+        }
+        /* Label radio (menu sidebar) yang belum dipilih juga sering di-dim
+           Streamlit -- kunci opacity penuh supaya semua opsi sama-sama jelas
+           kebaca, bukan cuma yang lagi aktif. */
+        [data-testid="stSidebar"] [role="radiogroup"] label,
+        [data-testid="stSidebar"] [role="radiogroup"] label * {
+            opacity: 1 !important;
+        }
 
         /* Komponen custom (hero/badge/kpi) punya warna sendiri yang sudah
            dipilih buat kontras di atas background berwarna -- dikunci pakai
@@ -611,14 +630,14 @@ def halaman_ml():
             with c3:
                 kpi_card("F1 Macro", f"{best_macro:.4f}", best)
 
-            st.plotly_chart(_bar_chart_weighted_macro(task, ML_MODEL_NAMES), width="stretch")
+            st.plotly_chart(_bar_chart_weighted_macro(task, ML_MODEL_NAMES), width="stretch", theme=None)
 
             if task == "aspek":
                 section(
                     "Breakdown per Aspek",
                     "Financial adalah kelas minoritas (2.912 sampel di data training) -- F1 rendah di semua model ML.",
                 )
-                st.plotly_chart(_grouped_chart_per_aspek(ML_MODEL_NAMES), width="stretch")
+                st.plotly_chart(_grouped_chart_per_aspek(ML_MODEL_NAMES), width="stretch", theme=None)
 
             st.dataframe(_full_table(task, ML_MODEL_NAMES), width="stretch", hide_index=True)
 
@@ -643,7 +662,7 @@ def halaman_dl():
             kpi_card("F1 Weighted", f"{d['f1_weighted']:.4f}", "vs Gold Standard")
         with c2:
             kpi_card("F1 Macro", f"{d['f1_macro']:.4f}", "vs Gold Standard")
-        st.plotly_chart(_grouped_chart_per_aspek(["DistilBERT (DL)"]), width="stretch")
+        st.plotly_chart(_grouped_chart_per_aspek(["DistilBERT (DL)"]), width="stretch", theme=None)
     with tab_sentimen:
         d = STATIC_RESULTS["sentimen"]["DistilBERT (DL)"]["vs_gold"]
         c1, c2 = st.columns(2)
@@ -651,7 +670,7 @@ def halaman_dl():
             kpi_card("F1 Weighted", f"{d['f1_weighted']:.4f}", "vs Gold Standard")
         with c2:
             kpi_card("F1 Macro", f"{d['f1_macro']:.4f}", "vs Gold Standard")
-        st.plotly_chart(_sentimen_per_kelas_chart(), width="stretch")
+        st.plotly_chart(_sentimen_per_kelas_chart(), width="stretch", theme=None)
         st.caption("Breakdown per-kelas dari classification_report notebook 05b (TAHAP B, vs 378 pasangan Gold).")
 
 
@@ -694,7 +713,7 @@ def halaman_dashboard():
                 kpi_card("Selisih DL vs ML terbaik", f"+{gap:.4f}", "DistilBERT masih unggul" if gap > 0 else "ML menyusul DL")
 
             section("F1 Weighted & Macro per Model")
-            st.plotly_chart(_bar_chart_weighted_macro(task, all_models), width="stretch")
+            st.plotly_chart(_bar_chart_weighted_macro(task, all_models), width="stretch", theme=None)
 
             if task == "aspek":
                 section(
@@ -702,7 +721,7 @@ def halaman_dashboard():
                     "Financial adalah kelas minoritas (2.912 sampel di data training) -- F1 rendah "
                     "di semua model, ML maupun DL, konsisten dengan temuan skripsi.",
                 )
-                st.plotly_chart(_grouped_chart_per_aspek(all_models), width="stretch")
+                st.plotly_chart(_grouped_chart_per_aspek(all_models), width="stretch", theme=None)
 
             section(
                 "Tabel Lengkap",
