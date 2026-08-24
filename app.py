@@ -311,6 +311,44 @@ def inject_css():
     st.markdown(
         """
         <style>
+        /* Paksa tema TERANG selalu, apapun preferensi dark-mode browser/OS
+           viewer atau default tema Streamlit Cloud -- config.toml [theme]
+           kadang ke-override oleh setting per-viewer, jadi dikunci lagi di
+           sini supaya kontras teks/background selalu aman dibaca. */
+        .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"],
+        [data-testid="stMain"], .main {
+            background-color: #ffffff !important;
+        }
+        [data-testid="stSidebar"], [data-testid="stSidebarContent"] {
+            background-color: #f0f9ff !important;
+        }
+        .stApp p:not(.hero *), .stApp span:not(.hero *):not(.badge),
+        .stApp label:not(.hero *), .stApp div:not(.hero *):not(.kpi-card *),
+        [data-testid="stMarkdownContainer"]:not(.hero *),
+        [data-testid="stMetricValue"], [data-testid="stMetricLabel"],
+        [data-testid="stWidgetLabel"] {
+            color: #0f172a !important;
+        }
+        [data-testid="stSidebar"] *:not(.hero *) {
+            color: #0f172a !important;
+        }
+        h1:not(.hero h1), h2:not(.hero h2), h3:not(.hero h3),
+        h4:not(.hero h4), h5:not(.hero h5), h6:not(.hero h6) {
+            color: #0f172a !important;
+        }
+        [data-testid="stDataFrame"] {background-color: #ffffff !important;}
+
+        /* Komponen custom (hero/badge/kpi) punya warna sendiri yang sudah
+           dipilih buat kontras di atas background berwarna -- dikunci pakai
+           !important supaya tidak ketiban aturan paksa-terang di atas. */
+        .hero h1 {color: #ffffff !important;}
+        .hero p, .hero-chip {color: #e0f2fe !important;}
+        .kpi-value {color: #0e7490 !important;}
+        .kpi-label {color: #475569 !important;}
+        .kpi-sub {color: #94a3b8 !important;}
+        .badge-ml {color: #0e7490 !important;}
+        .badge-dl {color: #c2410c !important;}
+
         .block-container {padding-top: 2rem; padding-bottom: 3rem;}
 
         .hero {
@@ -457,6 +495,8 @@ def _bar_chart_weighted_macro(task: str, models: list[str]):
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         margin=dict(t=40, b=10, l=10, r=10),
         plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(color="#0f172a"),
     )
     return fig
 
@@ -480,6 +520,8 @@ def _grouped_chart_per_aspek(models: list[str]):
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         margin=dict(t=40, b=10, l=10, r=10),
         plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(color="#0f172a"),
     )
     return fig
 
@@ -503,6 +545,8 @@ def _sentimen_per_kelas_chart():
         yaxis=dict(title="F1 (vs Gold Standard)", range=[0, 1]),
         margin=dict(t=20, b=10, l=10, r=10),
         plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(color="#0f172a"),
         showlegend=False,
     )
     return fig
