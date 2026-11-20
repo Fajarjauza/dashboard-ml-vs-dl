@@ -1,64 +1,6 @@
 """
 Dashboard Perbandingan ML vs DL
 ================================
-Dashboard TAMBAHAN, terpisah dari dashboard TA utama. Isinya perbandingan
-Machine Learning (Naive Bayes, Random Forest, Logistic Regression -- fitur
-TF-IDF) vs Deep Learning (DistilBERT, locked dari TA, tidak di-retrain di
-sini), untuk dua task: Aspek (multi-label, 4 kelas) dan Sentimen
-(multi-class, 3 kelas). Dataset sama dengan dataset TA.
-
-Semua kode dalam SATU file (`app.py`) sesuai preferensi user -- lebih
-gampang di-track, mirip pola notebook yang selalu dikirim utuh.
-
-Ditulis ulang dari awal (2026-08-21) menggantikan draft sebelumnya yang
-sempat kepecah multi-file lalu digabung lagi. Angka statis di section 2
-LOCKED dari `hasil_perbandingan_ml_dl.json` (diambil langsung dari Google
-Drive, termasuk breakdown per-aspek untuk SEMUA model ML, bukan cuma
-DistilBERT). Halaman live prediction (section 7) berisi logic lengkap.
-
-Update 2026-08-24 (Fase A selesai): model sudah diupload user ke HF Hub lewat
-notebook Colab (`upload_script/FaseA_Upload_ke_HF_Hub.ipynb`, dibuat karena
-sandbox Cowork tidak bisa akses huggingface.co langsung). `HF_MODEL_REPO`,
-`DISTILBERT_ASPEK_REPO`, `DISTILBERT_SENTIMEN_REPO` di bawah sudah diisi repo
-asli (`Jauzaa/...`, public) -- halaman Live Prediksi sekarang seharusnya bisa
-jalan end-to-end.
-
-Update 2026-08-21 (redesign kedua): sidebar dipecah jadi 4 menu terpisah --
-Machine Learning (ML), Deep Learning (DL), ML vs DL, dan Live Prediksi.
-Halaman ML dan DL masing-masing sekarang punya section "Dataset",
-"Konfigurasi Model" (hyperparameter persis, diambil ulang dari cell kode
-notebook `ML_Baseline_Aspek_Sentimen.ipynb`, bukan dari ringkasan chat),
-dan "Ringkasan Hasil" (visualisasi khusus model tipe itu saja). Sekalian
-ketauan & DIPERBAIKI bug di `_tag_text()`: notebook aslinya menempelkan tag
-`[ASPEK_<NAMA>]` di AKHIR teks (`text.lower() + " [ASPEK_" + aspek + "]"`),
-bukan di depan seperti draft pertama -- kalau tidak disamakan, TF-IDF n-gram
-di sekitar tag jadi beda dari yang dipelajari model saat training.
-
-Update 2026-08-21 (sore, setelah user kasih screenshot folder Drive):
-notebook asli `05a_modeling_aspek.ipynb` & `05b_modeling_sentimen.ipynb`
-TERNYATA ADA di Drive (sebelumnya dikira 05b tidak pernah diupload --
-salah, sudah dicek ulang & didownload langsung). Ini mengoreksi 2 hal
-penting yang sempat salah di draft sebelumnya:
-1. Nama folder checkpoint final BUKAN `ckpt_<rasio>` (itu cuma output_dir
-   sementara Trainer, dihapus `shutil.rmtree()` selesai training) --
-   yang persis disimpan permanen (`trainer.save_model(...)`) adalah
-   `model_rasio_<rasio>`. `DISTILBERT_ASPEK_CKPT` / `DISTILBERT_SENTIMEN_CKPT`
-   di bawah sudah diperbaiki.
-2. Format input sentimen DistilBERT BUKAN tag `[ASPEK_<NAMA>]` ala ML --
-   notebook 05b pakai frasa alami per aspek digabung `" [SEP] "` + teks
-   (lihat `FRASA_ASPEK` & `predict_sentimen_distilbert()`). Draft
-   sebelumnya salah asumsi format ini sama dengan ML -- sudah diperbaiki.
-DL_CONFIG di bawah sekarang isi hyperparameter ASLI (base model, LR,
-epoch, batch size, dst), bukan lagi placeholder "belum tercatat".
-
-Update 2026-08-21 (redesign ketiga, permintaan user): tabel konfigurasi di
-halaman ML & DL dirapikan -- section "Dataset" (sumber file, nama kolom)
-DIHAPUS total dari kedua halaman karena bukan konfigurasi training, cuma
-bikin ramai. `ML_CONFIG`/`DL_CONFIG` diringkas jadi `ML_TRAINING_CONFIG`/
-`DL_TRAINING_CONFIG` -- satu tabel flat per halaman, murni parameter
-training, tanpa jargon kode. Sidebar juga diurutkan ulang: Dashboard
-(ringkasan ML vs DL, dulu namanya halaman "ML vs DL") sekarang paling atas,
-baru ML, DL, Live Prediksi.
 """
 
 import os
